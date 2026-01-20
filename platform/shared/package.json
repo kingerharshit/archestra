@@ -6,7 +6,8 @@
   "private": true,
   "exports": {
     ".": "./index.ts",
-    "./access-control": "./access-control.ts"
+    "./access-control": "./access-control.ts",
+    "./model-capabilities": "./model-capabilities.ts"
   },
   "scripts": {
     "lint": "biome check",

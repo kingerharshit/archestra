@@ -1,7 +1,11 @@
 "use client";
 
-import { providerDisplayNames, type SupportedProvider } from "@shared";
-import { CheckIcon, Loader2 } from "lucide-react";
+import {
+  getModelCapabilities,
+  providerDisplayNames,
+  type SupportedProvider,
+} from "@shared";
+import { Brain, CheckIcon, Image, Loader2, Sparkles, Volume2, Wrench } from "lucide-react";
 import { useMemo, useState } from "react";
 import {
   ModelSelectorContent,
@@ -16,6 +20,7 @@ import {
   ModelSelectorTrigger,
 } from "@/components/ai-elements/model-selector";
 import { PromptInputButton } from "@/components/ai-elements/prompt-input";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useModelsByProviderQuery } from "@/lib/chat-models.query";
 
 interface ModelSelectorProps {
@@ -39,6 +44,69 @@ const providerToLogoProvider: Record<SupportedProvider, string> = {
   ollama: "ollama",
   zhipuai: "zhipuai",
 };
+
+function CapabilityIcon({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <span className="inline-flex size-5 items-center justify-center text-muted-foreground">
+          {children}
+        </span>
+      </TooltipTrigger>
+      <TooltipContent>{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+function ModelCapabilityIcons({ modelId }: { modelId: string }) {
+  const caps = getModelCapabilities(modelId);
+
+  // Only show supported capabilities (keeps the list clean).
+  const hasAny =
+    caps.supportsVision ||
+    caps.supportsTools ||
+    caps.supportsImageGeneration ||
+    caps.supportsAudio ||
+    caps.supportsReasoning;
+
+  if (!hasAny) return null;
+
+  return (
+    <div className="flex shrink-0 items-center gap-0.5">
+      {caps.supportsVision && (
+        <CapabilityIcon label="Vision">
+          <Image className="size-3.5" />
+        </CapabilityIcon>
+      )}
+      {caps.supportsTools && (
+        <CapabilityIcon label="Tools">
+          <Wrench className="size-3.5" />
+        </CapabilityIcon>
+      )}
+      {caps.supportsImageGeneration && (
+        <CapabilityIcon label="Image generation">
+          <Sparkles className="size-3.5" />
+        </CapabilityIcon>
+      )}
+      {caps.supportsAudio && (
+        <CapabilityIcon label="Audio">
+          <Volume2 className="size-3.5" />
+        </CapabilityIcon>
+      )}
+      {caps.supportsReasoning && (
+        <CapabilityIcon label="Reasoning">
+          <Brain className="size-3.5" />
+        </CapabilityIcon>
+      )}
+    </div>
+  );
+}
 
 /**
  * Model selector dialog with:
@@ -165,7 +233,8 @@ export function ModelSelector({
                     <ModelSelectorLogo provider={selectedModelLogo} />
                   )}
                   <ModelSelectorName>{selectedModel}</ModelSelectorName>
-                  <CheckIcon className="ml-auto size-4" />
+                  <ModelCapabilityIcons modelId={selectedModel} />
+                  <CheckIcon className="ml-2 size-4" />
                 </ModelSelectorItem>
               </ModelSelectorGroup>
             )}
@@ -185,10 +254,11 @@ export function ModelSelector({
                       provider={providerToLogoProvider[provider]}
                     />
                     <ModelSelectorName>{model.displayName}</ModelSelectorName>
+                    <ModelCapabilityIcons modelId={model.id} />
                     {selectedModel === model.id ? (
-                      <CheckIcon className="ml-auto size-4" />
+                      <CheckIcon className="ml-2 size-4" />
                     ) : (
-                      <div className="ml-auto size-4" />
+                      <div className="ml-2 size-4" />
                     )}
                   </ModelSelectorItem>
                 ))}

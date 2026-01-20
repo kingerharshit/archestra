@@ -58,8 +58,7 @@ const MAX_IMAGE_SIZE_BYTES = 100 * 1024; // 100KB
 /**
  * Check if a model supports image inputs.
  *
- * Uses a blocklist approach: models known to not support images return false,
- * all other models are assumed to support images.
+ * Uses the centralized model capabilities registry.
  *
  * @param model - The model name/ID to check
  * @returns true if the model supports image inputs, false otherwise
